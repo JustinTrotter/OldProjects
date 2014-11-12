@@ -1,6 +1,6 @@
 /* 
 *    Name:  Justin Trotter
-*    Current Date:  3/7/2014
+*    Current Date:  3/11/2014
 *    Sources Consulted: http://cslibrary.stanford.edu/110/BinaryTrees.html
 *    
 *    Honor morse Statement: In keeping with the honor morse policies of the University of Mississippi, the School of Engineering, and the Department of Computer and Information Science, I affirm that I have neither given nor received assistance on this programming assignment. This assignment represents my individual, original effort. 
@@ -15,13 +15,11 @@ public class BinaryTree {
 		Node left;
 		Node right;
 		String letter;
-		String morse;
 		
 		Node(String newLetter, String newmorse){
 			left = null;
 			right = null;
 			letter = newLetter;
-			morse = newmorse;
 		}
 	}
 	
@@ -29,25 +27,39 @@ public class BinaryTree {
 		root = null;
 	}
 	
-	public boolean lookup(String letter, String morse){
-		return(lookup(root, letter, morse));
+	public String lookup(String morse){
+		int index = 0;
+		
+		if(index < morse.length()){
+			if(morse.charAt(index) == '.'){
+				index++;
+				return (lookup(root.left, index, morse));
+			}
+			
+			else{
+				index++;
+				return (lookup(root.right, index, morse));
+			}
+		}
+		else{
+			return root.letter;
+		}
 	}
 	
-	public boolean lookup(Node node, String letter, String morse){
-		if(node == null){
-			return false;
+	public String lookup(Node node, int index, String morse){
+		if (index < morse.length()){
+			
+			if(morse.charAt(index) == '.'){
+				index++;
+				return (lookup(node.left, index, morse));
+			}
+			else{
+				index++;
+				return (lookup(node.right, index, morse));
+			}
 		}
-		
-		if (morse == node.morse){
-			return true;
-		}
-		
-		else if (morse == "."){
-			return(lookup(node.left, letter, morse));
-		}
-		
-		else {
-			return(lookup(node.right, letter, morse));
+		else{
+			return node.letter;
 		}
 	}
 	
@@ -65,13 +77,11 @@ public class BinaryTree {
 			if (morse.charAt(count) == '.'){
 				count++;
 				node.left = insert(node.left, letter, morse);
-				
 			}
 			
 			else if (morse.charAt(count) == '-') {
 				count++;
-				node.right = insert(node.right, letter, morse);
-				
+				node.right = insert(node.right, letter, morse);			
 			}
 		}
 		
@@ -85,8 +95,6 @@ public class BinaryTree {
 	
 	private void printTree(Node node){
 		if (node == null) return;
-		
-		//left, node itself, right
 		printTree(node.left);
 		System.out.print(node.letter);
 		printTree(node.right);
@@ -97,58 +105,22 @@ public class BinaryTree {
 		System.out.println();
 	}
 	
+	public void printPreorder(){
+		printPreorder(root);
+		System.out.println();
+	}
+	
+	private void printPreorder(Node node){
+		if  (node == null) return;
+		System.out.print(node.letter);
+		printPreorder(node.left);
+		printPreorder(node.right);	
+	}
+	
 	private void printPostorder(Node node){
 		if (node == null) return;
-		
-		// first recur on both subtrees
 		printPostorder(node.left);
 		printPostorder(node.right);
-		
-		// then deal with the node
 		System.out.print(node.letter);
-		
-	}
-	
-	public void printPaths(){
-		String[] path = new String[1000];
-		printPaths(root, path, 0);
-	}
-	
-	private void printPaths(Node node, String[] path, int pathLen) { 
-		  if (node==null) return;
-
-		  // append this node to the path array 
-		  path[pathLen] = node.letter; 
-		  pathLen++;
-
-		  // it's a leaf, so print the path that led to here 
-		  if (node.left==null && node.right==null) { 
-		    printArray(path, pathLen); 
-		  } 
-		  else { 
-		  // otherwise try both subtrees 
-		    printPaths(node.left, path, pathLen); 
-		    printPaths(node.right, path, pathLen); 
-		  } 
-		}
-	
-	private void printArray(String[] ints, int len) { 
-		  for (int i = 0; i < len; i++) { 
-		   System.out.print(ints[i] + " "); 
-		  } 
-		  System.out.println(); 
-		} 
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	}	
 }
