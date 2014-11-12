@@ -1,0 +1,65 @@
+Script started on Mon 30 Jun 2014 05:12:54 PM CDT
+[jetrotte@turing ~]$ more homework1.c
+/*
+ * Justin Trotter
+ *
+ * Homework 1
+ * hello.c
+ *
+ * I know how to use the vi editor!
+ *
+ */
+
+#include <stdio.h>
+
+int cnt;
+int a;
+int b;
+int c;
+
+main(int argc, const char *argv[], char *envp[])
+{
+    a = 0;
+    b = 1;
+   
+    printf("%d", a);
+    printf(" ");
+    printf("%d", b);
+    printf(" ");
+   
+    for(cnt=0;cnt<atoi(argv[1]);cnt++)
+    {
+        c = a + b;
+        printf("%d", c);
+        printf(" ");
+        a = b;
+        b = c;
+    }
+    printf("\n");
+}
+[jetrotte@turing ~]$ gcc -S homework1.c -o homework1.s
+[jetrotte@turing ~]$ gcc -S homework1.s -o homework1.o
+[jetrotte@turing ~]$ gcc -S homework1.c -o homework1
+[jetrotte@turing ~]$ ls -ln
+total 48
+-rw-------. 1 11060 10000    0 Jun 30 15:20 }
+-rwxr-xr-x. 1 11060 10000 7024 Jun 30 17:10 a.out
+drwxr-xr-x. 1 11060 10000    0 Jan 22 11:49 Hdrive
+-rwxr-xr-x. 1 11060 10000 6425 Jun 30 15:18 Hello
+-rw-------. 1 11060 10000  213 Jun 30 16:04 Hello.c
+-rw-------. 1 11060 10000 1496 Jun 30 15:10 Hello.o
+-rw-------. 1 11060 10000  428 Jun 30 15:07 Hello.s
+-rw-------. 1 11060 10000 1392 Jun 30 17:14 homework1
+-rw-------. 1 11060 10000  406 Jun 30 17:12 homework1.c
+-rw-------. 1 11060 10000 1392 Jun 30 17:00 homework1.i
+-rw-------. 1 11060 10000 1392 Jun 30 16:59 homework1.o
+-rw-------. 1 11060 10000 1392 Jun 30 17:13 homework1.s
+-rw-------. 1 11060 10000    0 Jun 30 17:12 typescript
+[jetrotte@turing ~]$ gcc homework1.c
+[jetrotte@turing ~]$ a.out 10
+0 1 1 2 3 5 8 13 21 34 55 89
+[jetrotte@turing ~]$ a.out 20
+0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 1597 2584 4181 6765 10946
+[jetrotte@turing ~]$ exit
+
+Script done on Mon 30 Jun 2014 05:14:31 PM CDT

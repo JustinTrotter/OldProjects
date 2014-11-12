@@ -1,0 +1,107 @@
+//Justin Trotter 10144892 -- Program 2
+
+GAS LISTING hw2.s             page 1
+
+
+   1                      .file    "hw2.c"
+   2                      .section    .rodata
+   3                  .LC0:
+   4 0000 3120706C         .string    "1 plus 2 equals 3"
+   4      75732032
+   4      20657175
+   4      616C7320
+   4      3300
+   5                  .LC1:
+   6 0012 25642070         .string    "%d plus %d equals %d\n"
+   6      6C757320
+   6      25642065
+   6      7175616C
+   6      73202564
+   7                  .LC2:
+   8 0028 0A00             .string    "\n"
+   9                      .text
+  10                      .globl    main
+  11                      .type    main, @function
+  12                  main:
+  13                  .LFB0:
+  14                      .cfi_startproc
+  15 0000 55               pushl    %ebp        //pushes long from %ebp to %esp
+  16                      .cfi_def_cfa_offset 8u
+  17                      .cfi_offset 5, -8
+  18 0001 89E5             movl    %esp, %ebp    //moves long from %esp to %ebp
+  19                      .cfi_def_cfa_register 5
+  20 0003 83E4F0           andl    $-16, %esp    //ands literal -16 onto %esp
+  21 0006 83EC20           subl    $32, %esp    //subtracts literal 32 onto %esp (setting up room to work in)
+  22 0009 8B450C           movl    12(%ebp), %eax    //moves argv[] to %eax
+  23 000c 83C004           addl    $4, %eax    //adds literal 4 to %eax (this increments an element on argv[])
+  24 000f 8B00             movl    (%eax), %eax    //moves object at %eax to %eax
+  25 0011 0FB600           movzbl    (%eax), %eax    //moves object bytes at %eax to %eax with zeros at front
+  26 0014 0FBEC0           movsbl    %al, %eax    //converts %eax into signed int
+  27 0017 83E830           subl    $48, %eax    //subtracts 48 from %eax, aka convert from ASCII code to binary
+  28 001a 89442410         movl    %eax, 16(%esp)    //moves eax to 16th address onto object at %exp (num1)
+  29 001e 8B450C           movl    12(%ebp), %eax    //moves argv[] to %eax
+  30 0021 83C008           addl    $8, %eax    //adds literal 8 to %eax (argv[2])
+  31 0024 8B00             movl    (%eax), %eax    //moves object at %eax to eax
+  32 0026 0FB600           movzbl    (%eax), %eax    //moves object bytes at %eax to %eax with zeros at front
+  33 0029 0FBEC0           movsbl    %al, %eax    //converts eax into signed int
+  34 002c 83E830           subl    $48, %eax    //subtracts 48 from %eax, aka convert from ASCII code to binary
+  35 002f 89442414         movl    %eax, 20(%esp)    //moves eax to 20th address onto object at %esp (num2)
+  36 0033 C7442418         movl    $.LC0, 24(%esp)    //moves "1 plus 2 equals 3" to 24th address onto object at %esp
+  36      00000000
+  37 003b 8B442414         movl    20(%esp), %eax    //moves num2 onto %eax
+  38 003f 8B542410         movl    16(%esp), %edx    //moves num1 onto %edx
+  39 0043 01D0             addl    %edx, %eax    //adds num1 to num2 and stores in %eax
+  40 0045 8944241C         movl    %eax, 28(%esp)    //moves %eax to 28th address onto object at %esp (total)
+  41 0049 8B44241C         movl    28(%esp), %eax    //moves total to %eax
+  42 004d 8944240C         movl    %eax, 12(%esp)    //moves %eax to 12th address onto object at %esp (last %d)
+  43 0051 8B442414         movl    20(%esp), %eax    //moves num2 to %eax
+  44 0055 89442408         movl    %eax, 8(%esp)    //moves %eax to 8th address onto object at %esp (2nd %d)
+  45 0059 8B442410         movl    16(%esp), %eax    //moves num1 onto %eax
+  46 005d 89442404         movl    %eax, 4(%esp)    //moves %eax to 4th address onto object at %esp (1st %d)
+  47 0061 C7042412         movl    $.LC1, (%esp)    //moves "%d plus %d equals %d\n" to object at %esp
+  47      000000
+^LGAS LISTING hw2.s             page 2
+
+
+  48 0068 E8FCFFFF         call    printf        //prints "4(%esp) plus 8(%esp) equals 12(%esp)\n" on screen
+  48      FF
+  49 006d 8B442418         movl    24(%esp), %eax    //moves "1 plus 2 equals 3" to %eax
+  50 0071 890424           movl    %eax, (%esp)    //moves %eax to object at %esp
+  51 0074 E8FCFFFF         call    puts        //prints "1 plus 2 equals 3\n" on screen
+  51      FF
+  52 0079 C7442408         movl    $17, 8(%esp)    //moves literal 17 to 8th address onto object at %esp
+  52      11000000
+  53 0081 8B442418         movl    24(%esp), %eax    //moves "1 plus 2 equals 3" to %eax
+  54 0085 89442404         movl    %eax, 4(%esp)    //moves %eax to 4th address onto object at %esp
+  55 0089 C7042401         movl    $1, (%esp)    //moves literal 1 to object at %esp
+  55      000000
+  56 0090 E8FCFFFF         call    write        //prints "1 plus 2 equals 3" onto screen
+  56      FF
+  57 0095 C7442408         movl    $1, 8(%esp)    //moves literal 1 to 8th address onto object at %esp
+  57      01000000
+  58 009d C7442404         movl    $.LC2, 4(%esp)    //moves "\n" to 4th address onto object at %esp
+  58      28000000
+  59 00a5 C7042401         movl    $1, (%esp)    //moves literal 1 to object at %esp
+  59      000000
+  60 00ac E8FCFFFF         call    write        //prints "\n" onto screen
+  60      FF
+  61 00b1 C9               leave            //end of function
+  62                      .cfi_restore 5
+  63                      .cfi_def_cfa 4, 4
+  64 00b2 C3               ret            //return (Black Magic!)
+  65                      .cfi_endproc
+  66                  .LFE0:
+  67                      .size    main, .-main
+  68                      .ident    "GCC: (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3"
+  69                      .section    .note.GNU-stack,"",@progbits
+^LGAS LISTING hw2.s             page 3
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 hw2.c
+               hw2.s:12     .text:0000000000000000 main
+
+UNDEFINED SYMBOLS
+printf
+puts
+write

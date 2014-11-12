@@ -1,0 +1,260 @@
+Script started on Wed 23 Jul 2014 06:43:15 PM CDT
+[jetrotte@turing ~]$ more assign5.s
+    .file    "da64more.s"
+.data
+        .align 4
+num0:
+    .long 0
+num1:
+    .long 0
+num2:
+    .long 0
+num3:
+    .long 0
+num4:
+    .long 0
+num5:
+    .long 0
+num6:
+    .long 0
+num7:
+    .long 0
+num8:
+    .long 0
+num9:
+    .long 0
+total:
+    .long 0
+radix:
+    .long 10
+disp:
+    .long 0
+buff0:
+        .ascii "           "
+        .ascii " plus "
+buff1:
+        .ascii "           "
+        .ascii " plus "
+buff2:
+        .ascii "           "
+        .ascii " plus "
+buff3:   
+    .ascii "           "
+    .ascii " plus "
+buff4: 
+    .ascii "           "
+        .ascii " plus "
+buff5: 
+    .ascii "           "
+        .ascii " plus "
+buff6: 
+    .ascii "           "
+        .ascii " plus "
+buff7: 
+    .ascii "           "
+        .ascii " plus "
+buff8: 
+    .ascii "           "
+        .ascii " plus "
+buff9:
+    .ascii "           "
+    .ascii " equals "
+buff10:
+        .ascii "           "
+        .string "\n"
+        .zero 6
+errormsg:
+    .ascii "Usage: ba num0 [[num1] [num2]...[num10]]\n"
+errormsg2:
+    .ascii "Error: Overflow\n"
+errormsg3:
+    .ascii "Error: Too Few Arguements\n"
+.section        .rodata
+.text
+    .align 4
+.globl main
+    .type     main,@function
+#
+# Recursive number converter
+# Usage: ba num0 num1 num2
+#
+main:
+        pushq  %rbp              # Save the old frame pointer
+        movq   %rsp, %rbp        # Start a new frame here
+        subq   $48, %rsp         # Make room for 8 quad locals
+        movl   %edi, -20(%rbp)   # Save argc in locals
+        movq   %rsi, -32(%rbp)   # Save argv in locals
+    cmpl   $3, -20(%rbp)     ## Are there less than 2 arguements?
+    jl     error3
+        # Display original buffer contents
+#        movl   $45, %edx         # Do          3rd arg == byte count
+#        movq   $buff0, %rsi      #  write      2nd arg == buff address
+#        movl   $1, %edi          #   system    1st arg == file descriptor
+#        movl   $0, %eax          #    service  Clear return register
+#        call   write
+        # Read numbers from command line
+        movq   -32(%rbp), %rdx   # Fetch argv pointer
+        addq   $8, %rdx          # Start with pointer to argv[1]
+        movq   $num0, %rcx       # Set up pointer to list of binary numbers
+        movq   $11, %r8          # Max number of bin nums+1
+nextnum:   
+        movq   (%rdx), %rsi      # Fetch ptr to argv[n] number
+        test   %rsi, %rsi        # Reached end-of-list?
+        je     lastnum           # Yes, Time to add up the numbers
+    call   getarg            # No, Fetch and convert ASCII argument
+    movl   %eax, (%rcx)      # Save the binary number
+        addq   $8, %rdx          # Increment pointer to next ACSII number
+        addq   $4, %rcx          # Increment pointer to next binary number
+        decq   %r8               # Reached end of bin num buffer?
+        jz     error             # Yes, too many numbers
+        jmp    nextnum           # No, get the next number
+lastnum:
+    movq   $num0, %rcx     ## Save starting place for argv[n]
+    movl   (%rcx), %eax     ## Point to argv[n]
+    movl   $1, %r8d          ## S count to register
+    movl   -20(%rbp), %r9d     ## Save argc to register
+    jmp    addend         ## While loop, so start at condition
+addloop:             ## Start of add loop
+    addq   $4, %rcx         ## Shift to next arg
+    movl   (%rcx), %r10d     ## Save arg to temp register
+    addl   %r10d, %eax     ## Add to total
+    jo     error2         ## Jump if Overflow
+    addl   $1, %r8d         ## Increment count
+addend:                 ## End of add loop
+    movl   %r8d, %edx     ## Fetch count variable
+    cmpl   %r9d, %edx     ## Is count < argc?
+    jl     addloop         ## If yes, then loop
+    addl   %eax, total(%rip) ## Finally save %eax to total
+    movl   radix(%rip), %ecx # Display the number in the specified radix
+
+    movq   $num0, %r11     ## Save starting place for argv[n]
+    movl   (%r11), %eax     ## Point to argv[n]
+    movl   $1, %r10d     ## Set count to register
+    movq   $0, %r9         ## Reset %r9 so that it no longer holds argc
+    jmp    buffend         ## While loop, so start at condition
+buffloop:
+    movl   (%r11), %r8d     ## Point to current argv[n]
+    leaq   buff0(%r9), %rdi  ## Point to buff0 address, save for output buffer
+    movl   %r8d, %eax     ## Save current argv[n] as binary number
+    call   bin2ascii     ## Call b2a function
+    addl   $1, %r10d     ## Increment count
+    addq   $4, %r11         ## argv[n+1]
+    addq   $17, %r9         ## move to next buffer position
+
+        # End of loop
+buffend:
+    movl   %r10d, %edx     ## Fetch count variable
+    cmpl   $11, %edx     ## Is count < 11?
+    jl     buffloop         ## If yes, then loop   
+    leaq   buff10, %rdi     ## Point to buff10 address, save for output buffer
+    movl   total(%rip), %eax ## Save total binary number
+    call   bin2ascii     ## Call b2a function for total
+
+        # Display new buffer contents
+        movl   $191, %edx        # Do          3rd arg == byte count
+        movq   $buff0, %rsi      #  write      2nd arg == buff address
+        movl   $1, %edi          #   system    1st arg == file descriptor
+        movl   $0, %eax          #    service  Clear return register
+        call   write
+        jmp    end
+error:
+        movl   $41, %edx         # Do          3rd arg == byte count
+        movq   $errormsg, %rsi   #  write      2nd arg == buff address
+        movl   $1, %edi          #   system    1st arg == file descriptor
+        movl   $0, %eax          #    service  Clear return register
+        call   write
+    jmp    end         ## jump to end
+
+error2:
+    movl   $41, %edx
+    movq   $errormsg2, %rsi
+    movl   $1, %edi
+    movl   $0, %eax
+    call   write
+    jmp    end
+
+error3:
+    movl   $41, %edx
+    movq   $errormsg3, %rsi
+    movl   $1, %edi
+    movl   $0, %eax
+    call   write
+
+end:                             # Reset sp to saved frame pointer
+        leave                    # movq %rbp, %rsp;  popq %rbp
+        ret                      # popq %rip
+#
+# Get the argument from the command line and, save the ASCII
+# digits in the data area, and convert the digits to a binary number
+#
+# %esi == start of ASCII command line string
+# %eax == return value of binary number
+#
+getarg:
+    pushq  %rcx              # Save caller's cx
+    pushq  %rdx              # Save caller's dx
+        xorl %eax,%eax           # Begin with a 0 binary value
+nextdigit:
+        movsbl (%rsi), %ecx      # Get the ASCII number
+        cmpb   $'0', %cl         # Is it less than an ASCII 0?
+        jl     numend            # Yes, assume end of ASCII digits
+        cmpb   $'9', %cl         # No, is it greater than a '9'?
+        jg     numend            # Yes, probably garbage
+        subl   $'0', %ecx        # Make the new digit binary
+        movl   $10, %edx         #  and move the
+        mul    %edx              #   old number over one digit
+        addl   %ecx, %eax        # Add the new low order digit to sum
+        inc    %rsi              # Adjust pointer to next possible digit
+        jmp    nextdigit         #  and go look for another
+numend:
+    popq %rdx                # Restore callers dx register
+    popq %rcx                # Restore callers cx register
+        ret                      # popq %rip
+#
+# Convert binary to ASCII and put digits in buffer
+#
+# %eax == value of binary number
+# %ecx == radix value of the ASCII number
+# %rdi == start of ASCII output buffer
+#
+bin2ascii:             # Let's forget frame pointers
+        cmpl $0, %eax            # Is it a negative number?
+        jns b2a1                 # No - work the number directly
+        movb $'-', (%rdi)        # Yes - begin with the minus sign
+        inc %rdi                 #  and point to the next position
+        neg %eax                 # Make the negative number positive
+b2a1:                            # Entry point for recursion
+        xor %edx, %edx           # Clear the old remainder
+        div %ecx                 # Use base to strip off least significant digit
+        pushq %rdx               # Save intermediate result
+        and %eax, %eax           # Are there more digits?
+        jz b2a2                  # No, time to unwind
+        call b2a1                # Yes, then stack the next most significant digit
+b2a2:                            # Output the results left to right
+        popq %rax                # Fetch the next least significant digit
+        add $'0', %eax           # Make it ASCII
+        cmp $'9', %eax           # Does the result call for a Hex or greater digit
+        jle b2a3                 # No, just output the ASCII digit
+        add $7, %eax             # Yes, then move up to the alpha characters
+b2a3:
+        movb %al, (%rdi)         # Copy the ASCII char to the output buffer
+        inc %rdi                 #  moving from the left to the right
+    ret                      # Remember, no frame pointers
+[jetrotte@turing ~]$ ./a.out 1 2
+1           plus 2           plus 0           plus 0           plus 0           plus 0           plus 0           plus 0           plus 0           plus 0  
+        equals 3         
+[jetrotte@turing ~]$ ./a.out 1 2 3 4 5 6 7 8 9 10
+1           plus 2           plus 3           plus 4           plus 5           plus 6           plus 7           plus 8           plus 9           plus 10 
+        equals 55        
+[jetrotte@turing ~]$ ./a.out 150 250 350 500 321 567 398 245 689
+150         plus 250         plus 350         plus 500         plus 321         plus 567         plus 398         plus 245         plus 689         plus 0  
+        equals 3470      
+[jetrotte@turing ~]$ ./a.out 1 2 3 4 5 6 7 8 9 10 11
+Usage: ba num0 [[num1] [num2]...[num10]]
+[jetrotte@turing ~]$ ./a.out 1
+Error: Too Few Arguements
+[jetrotte@turing ~]$ ./a.out 111111111 1111111111 1111111111
+Error: Overflow
+[jetrotte@turing ~]$ exit
+
+Script done on Wed 23 Jul 2014 06:44:05 PM CDT

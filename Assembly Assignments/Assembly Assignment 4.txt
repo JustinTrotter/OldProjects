@@ -1,0 +1,212 @@
+ .file    "b2a-64hc.s"
+
+    .globl    num0
+    .data
+    .align 4
+    .type    num0, @object
+    .size    num0, 4
+num0:
+    .zero    4
+        .globl  num1
+        .align 4
+        .type   num1, @object
+        .size   num1, 4
+num1:
+        .long   0
+        .globl  num2
+        .align 4
+        .type   num2, @object
+        .size   num2, 4
+num2:
+        .long   0
+        .globl  total
+        .align 4
+        .type   total, @object
+        .size   total, 4
+total:
+        .long   0
+
+radix:
+    .long 10
+
+    .globl    buff0
+    .type    buff0, @object
+    .size    buff0, 12
+buff0:
+    .ascii "           "
+    .ascii " plus "
+
+    .globl    buff1
+    .type    buff1, @object
+    .size    buff1, 7
+buff1:
+    .ascii "           "
+    .ascii " plus "
+
+    .globl  buff2
+        .type   buff2, @object
+        .size   buff2, 9
+buff2:
+        .ascii "           "
+        .ascii " equals "
+
+        .globl  buff3
+        .type   buff3, @object
+        .size   buff3, 7
+buff3:
+        .ascii "           "
+        .string "\n"
+        .zero 6
+
+    .text
+    .globl    main
+    .type    main, @function
+    .align 8
+
+errormsg:
+    .ascii "Error: Please enter exactly 3 arguements\n"
+
+errormsg2:
+    .ascii "Error: Answer too large\n."
+
+main:
+        pushq   %rbp            # Save the old frame pointer
+        movq    %rsp, %rbp      # Start a new frame here
+    subq    $48, %rsp       # Make room for 8 quad locals
+    movl    %edi, -20(%rbp) # Save argc in locals
+    movq    %rsi, -32(%rbp) # Save argv in locals
+
+    cmpl    $3, -20(%rbp)    # Check if fewer than 3 arguements
+    jle    error        # Throw error
+
+    cmpl     $4, -20(%rbp)    # Check if greater than 3 arguements
+    jg    error        # Throw error
+
+        movq    -32(%rbp), %rdx # Fetch argv pointer
+        addq    $8, %rdx   # Skip prog name and fetch ptr to 1st
+    movq     $num0, %rcx   
+
+    movq     $11, %r8
+
+nextnum:
+    movq    (%rdx), %rsi    # Save argv pointer to %rsi
+    test     %rsi, %rsi    # Non-destructive addl
+    je     lastnum        # Jump if equal
+    call     getarg        # otherwise call getarg function
+
+    movl     %eax, (%rcx)
+    addq     $8, %rdx   
+    addq     $4, %rcx
+    decq     %r8
+    jz     error        # Throw error if garbage is encountered
+    jmp     nextnum
+
+lastnum:
+
+    movl     num0(%rip), %eax# save first arg to %eax
+    addl     num1(%rip), %eax# add 2nd arg to %eax
+    jo    error2        # throw error if overflow
+   
+    addl     num2(%rip), %eax# add 3rd arg to %eax
+    jo    error2        # throw error if overflow
+
+    movl     %eax, total(%rip)# save %eax to total
+    movl     radix(%rip), %ecx# use base 10
+
+    leaq     buff0, %rdi    # start at least significant digit of buff0
+    movl     num0(%rip), %eax# move 1st arg to %eax
+    call     bin2ascii    # call convert from binary to ascii function
+
+    leaq    buff1, %rdi    # start at least significant digit of buff1
+    movl    num1(%rip), %eax# move 2nd arg to %eax
+    call    bin2ascii    # call convert from binary to ascii function
+
+    leaq    buff2, %rdi    # start at least significant digit of buff2
+    movl    num2(%rip), %eax# move 3rd arg to %eax
+    call    bin2ascii    # call convert from binary to ascii function
+
+    leaq    buff3, %rdi    # start at least significant digit of buff3
+    movl    total(%rip), %eax#move result to %eax
+    call    bin2ascii    # call convert from binary to ascii function
+
+        movl     $90, %edx       # Do
+        movq     $buff0, %rsi       
+        movl     $1, %edi        #   system
+    movl     $0, %eax    #   write
+    call     write        #   service   
+        addl     $12, %esp       #  and reset stack pointer
+   
+    jmp     end
+
+error:
+    movl     $41, %edx    # write error message
+    movq     $errormsg, %rsi    # for incorrect number
+    movl     $1, %edi    # of arguements
+    movl     $0, %eax
+    call     write
+    jmp    end
+
+error2:
+    movl    $24, %edx    # write error message
+    movq    $errormsg2, %rsi# for overflow during addition
+    movl    $1, %edi
+    movl    $0, %eax
+    call     write
+
+end:
+   
+       leave
+       ret
+####
+
+getarg:
+    pushq     %rcx
+    pushq     %rdx
+    xorl     %eax, %eax
+
+nextdigit:
+    movsbl     (%rsi), %ecx
+    cmpb     $'0', %cl
+    jl     numend
+    cmpb     $'9', %cl
+    jg     numend
+    subl     $'0', %ecx
+    movl     $10, %edx
+
+    mul     %edx
+    addl     %ecx, %eax
+    inc     %rsi
+    jmp     nextdigit
+
+numend:
+    popq     %rdx
+    popq     %rcx
+    ret
+
+####
+bin2ascii:
+    cmp     $0, %eax
+    jns     b2a1
+#    movb     $'-', (%rdi) #skipping negative numbers for this assignment
+    inc     %rdi
+#    neg     %eax
+
+b2a1:
+    xor     %edx, %edx
+    div     %ecx
+    pushq     %rdx
+    and     %eax, %eax
+    jz     b2a2
+    call     b2a1
+
+b2a2:
+    pop     %rax
+    add     $'0', %eax
+    cmp     $'9', %eax
+    jle     b2a3
+    add     $7, %eax
+
+b2a3:
+    movb     %al, (%rdi)
+    inc     %rdi
+    ret

@@ -1,0 +1,160 @@
+    .file    "b2a-64hc.s"
+
+    .globl    num0
+    .data
+    .align 4
+    .type    num0, @object
+    .size    num0, 4
+num0:
+    .zero    4
+        .globl  num1
+        .align 4
+        .type   num1, @object
+        .size   num1, 4
+num1:
+        .long   0
+        .globl  num2
+        .align 4
+        .type   num2, @object
+        .size   num2, 4
+num2:
+        .long   0
+        .globl  total
+        .align 4
+        .type   total, @object
+        .size   total, 4
+total:
+        .long   0
+
+    .globl    buff0
+    .type    buff0, @object
+    .size    buff0, 12
+buff0:
+    .ascii "     ?"
+    .ascii " plus "
+
+    .globl    buff1
+    .type    buff1, @object
+    .size    buff1, 7
+buff1:
+    .ascii "?"
+    .ascii " plus "
+
+    .globl  buff2
+        .type   buff2, @object
+        .size   buff2, 9
+buff2:
+        .ascii "?"
+        .ascii " equals "
+
+        .globl  buff3
+        .type   buff3, @object
+        .size   buff3, 7
+buff3:
+        .ascii "    ?"
+        .string "\n"
+        .zero 6
+
+
+    .text
+    .globl    main
+    .type    main, @function
+#    .align 8
+main:
+        pushq   %rbp            # Save the old frame pointer
+        movq    %rsp, %rbp      # Start a new frame here
+    subq    $48, %rsp       # Make room for 8 quad locals
+    movl    %edi, -20(%rbp) # Save argc in locals
+    movq    %rsi, -32(%rbp) # Save argv in locals
+    movl    $34, %edx       # Number of chars to write in low-order D register
+    movq    $buff0, %rsi    # Load 64-bit ptr to string to source index register
+    movl    $1, %edi        # File descriptor to low-order 32-bits of destination index regist
+er
+    movl    $0, %eax        # Clear low-order expresion reg
+    call    write
+        movq    -32(%rbp), %rax # Fetch argv pointer
+        movq    8(%rax), %rsi   # Skip prog name and fetch ptr to 1st arg
+        xorq    %rax, %rax      # Begin with a 0 value
+nextdigit:
+        movsbl    (%rsi), %ecx    # Get the ASCII number
+        cmpb    $'0', %cl       # Is it less than an ASCII 0?
+        jl    numend          # Yes, assume end of ASCII digits
+        cmpb    $'9', %cl       # No, is it greater than a '9'?
+        jg    numend          # Yes, probably garbage
+        subl    $'0', %ecx      # Make the new digit binary
+        movl    $10, %edx       #  and move the
+        mul     %edx            #  old number over one digit
+        addl     %ecx, %eax      # Add the new low order digit to it   
+        inc     %rsi            # Adjust pointer to next possible digit
+
+        jmp    nextdigit       #  and go look
+numend:
+    movq -32(%rbp), %rax
+    movq 8(%rax), %rsi
+    movzbl (%rsi), %eax
+    movsbl %al, %eax
+    sub $48, %eax
+    addl %edx, %eax
+    movl %eax, num0(%rip)    # Save the bindary 1st Number
+
+    movq -32(%rbp), %rax
+    movq 16(%rax), %rsi
+    movzbl (%rsi), %eax
+    movsbl %al, %eax
+    sub $48, %eax
+    addl %edx, %eax
+    movl %eax, num1(%rip)   # Save the binary 2nd number
+
+    movq -32(%rbp), %rax
+    movq 24(%rax), %rsi
+    movzbl (%rsi), %eax
+    movsbl %al, %eax
+    sub $48, %eax
+    addl %edx, %eax
+    movl %eax, num2(%rip)   # Save the binary 3rd number
+
+
+    movl num0(%rip), %eax   # Fetch the first binary number
+    addl num1(%rip), %eax   # Fetch the second binary number
+    addl num2(%rip), %eax   # Fetch the third binary number
+       movl %eax, total(%rip)  # Save result
+
+
+        leaq buff3+4, %rdi      # Point to least significant position
+        movl $10, %ecx          # Store 10s digit divisor
+nxtpos:
+        xorl %edx, %edx         # Clear high order dividend register
+        divl %ecx               # Strip off the least significant digit
+#       addl %edx, '0'          # Caused a segmentation error
+        addl $'0', %edx         # Convert the digit to ASCII
+
+        movb %dl, (%edi)        # Put next digit into the buffer
+        decl %edi               # Move over to the next digit position
+        andl %eax,%eax          # Has the remainder reached zero?
+        jnz nxtpos              # No, do the next most significant digit
+   
+    movsbl num0, %eax
+    addb $'0', %al
+    movb %al, buff0+5
+
+       movsbl num1, %eax       # Fetch the second binary number
+        addb $'0', %al          # Make second number ASCII
+        movb %al, buff1         # Save second number in buffer
+        movsbl num2, %eax       # Fetch the 3rd binary number
+        addb $'0', %al          # Make 3rd number ASCII
+        movb %al, buff2         # Save 3rd number in buffer
+
+
+        movl $34, %edx               # Do
+        movq $buff0, %rsi
+        movl $1, %edi                #   system
+    movl $0, %eax
+    call write
+        addl $12, %esp          #  and reset stack pointer
+.L1:
+       leave
+        ret
+
+        movq    %rbp, %rsp     # Reset sp to saved frame pointer
+    popq    %rbp
+    ret

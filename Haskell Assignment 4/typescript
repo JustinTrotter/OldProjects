@@ -1,0 +1,44 @@
+﻿Script started on Sat 08 Nov 2014 11:08:15 AM CST
+#[01;32mlamb@lamb-LPC1#[01;34m ~/Projects $#[00m ghci
+GHCi, version 7.6.3: http://www.haskell.org/ghc/  :? for help
+Loading package ghc-prim ... linking ... done.
+Loading package integer-gmp ... linking ... done.
+Loading package base ... linking ... done.
+#[?1h#=Prelude> :l SandwichDSL
+#[?1l#>[1 of 1] Compiling SandwichDSL      ( SandwichDSL.hs, interpreted )
+Ok, modules loaded: SandwichDSL.
+#[?1h#=*SandwichDSL> newSandwich White
+#[?1l#>Sandwich [Bread White]
+#[?1h#=*SandwichDSL> newSandwich Wheat
+#[?1l#>Sandwich [Bread Wheat]
+#[?1h#=*SandwichDSL> newSandwich Rye
+#[?1l#>Sandwich [Bread Rye]
+#[?1h#=*SandwichDSL> addLayer (Sandwich[Bread White]) (Bread Rye)
+#[?1l#>Sandwich [Bread White,Bread Rye]
+#[?1h#=*SandwichDSL> isBread (Bread White)
+#[?1l#>True
+#[?1h#=*SandwichDSL> isBread (Cheese American)
+#[?1l#>False
+#[?1h#=*SandwichDSL> isCheese (Cheese American)
+#[?1l#>True
+#[?1h#=*SandwichDSL> noMeat(Sandwich[Bread White, Bread White])
+#[?1l#>True
+#[?1h#=*SandwichDSL> noMeat(Sandwich[Bread Rye, Meat Ham, Bread Rye])
+#[?1l#>False
+#[?1h#=*SandwichDSL> inOSO(Sandwich[Bread Rye, Meat Ham, Meat Ham, Cheese Cheddar, Vegetable Onion, Condiment Mustard, Bread Rye])
+#[?1l#>True
+#[?1h#=*SandwichDSL> inOSO(Sandwich[Bread White, Meat Ham, Cheese Cheddar, Vegetable Onion, Condiment Mustard, Bread Rye])
+#[?1l#>False
+#[?1h#=*SandwichDSL> inOSO(Sandwich[])
+#[?1l#>False
+#[?1h#=*SandwichDSL> priceSandwich(Sandwich[Bread White, Meat Ham, Cheese Cheddar, Bread White])
+#[?1l#>220
+#[?1h#=*SandwichDSL> complieSandwich(Sandwich[Bread White, Meat Ham, Cheese Cheddar, Bread White])
+#[?1l#>[StartSandwich,AddBread White,AddMeat Ham,AddCheese Cheddar,AddBread White,FinishSandwich,MoveToPlatter]
+#[?1h#=*SandwichDSL> compliePlatter([Sandwich[Bread White, Meat Ham, Cheese Cheddar, Bread White], Sandwich[Bread Rye, Meat RoastBeef, Condiment Mayo, Bread Rye]])
+#[?1l#>[StartSandwich,AddBread White,AddMeat Ham,AddCheese Cheddar,AddBread White,FinishSandwich,MoveToPlatter,StartSandwich,AddBread Rye,AddMeat RoastBeef,AddCondiment Mayo,AddBread Rye,FinishSandwich,MoveToPlatter]
+#[?1h#=*SandwichDSL> :q
+#[?1l#>Leaving GHCi.
+#[01;32mlamb@lamb-LPC1#[01;34m ~/Projects $#[00m exit
+
+Script done on Sat 08 Nov 2014 11:15:30 AM CST

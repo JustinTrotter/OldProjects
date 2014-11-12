@@ -1,0 +1,73 @@
+Script started on Wed 01 Oct 2014 11:14:00 PM CDT
+[jetrotte@turing ~]$ ghci
+GHCi, version 7.8.3: http://www.haskell.org/ghc/  :? for help
+Loading package ghc-prim ... linking ... done.
+Loading package integer-gmp ... linking ... done.
+Loading package base ... linking ... done.
+Prelude> :l Supermarket
+[1 of 1] Compiling Main             ( Supermarket.hs, interpreted )
+Ok, modules loaded: Main.
+*Main> formatCents 1023
+"10.23"
+*Main> formatCents 1202
+"12.02"
+*Main> formatCents 002
+"0.02"
+
+*Main> formatCents (-234)
+"*** Exception: Error!: Please enter positive value
+*Main> formatLine ("Dry Sherry, 1lt", 540)
+"Dry Sherry, 1lt...........5.40"
+
+*Main> putStr(formatLines [("Dry Sherry, 1lt", 540),("Fish Fingers", 121)])
+Dry Sherry, 1lt...........5.40
+Fish Fingers..............1.21
+
+*Main> putStr (makemakeTotal [("Dry Sherry, 1lt", 540)),("Fish Fingers", 121)]  makeTotal [("Dry Sherry, 1lt", 540),("Fish Fingers",                             makeTotal [("Dry Sherry, 1lt", 540),("Fish Fingers", 121)]                       makeTotal [("Dry Sherry, 10),("Fish Fingers", 121)]                              makeTotal [("Dry Sherry, 1lt", 540),("Fish F                                     makeTotal [("Dry Sherry, 1lt", 540),("Fish Fingers", 121)]
+
+661
+
+"Total.....................6.61"
+
+*Main> putStr(formatBill [("Dry Sherry, 1lt", 540), ("Fish Fingers", 121)])
+
+Haskell Stores
+
+Dry Sherry, 1lt...........5.40
+Fish Fingers..............1.21
+
+Total.....................6.61
+
+
+*Main> putStr(formatBill [("Dry Sherry, 1lt", 540), ("Fish Fingers", 121)])
+
+("Fish Fingers",121)
+
+("Nappies",1010)
+
+("Unknown item 3848",0)
+
+("Fish Fingers",121)
+
+("Unknown item 4848",0)
+
+[("Dry Sherry, 1lt",540),("Fish Fingers",121),("Orange Jelly",56),("Hula Hoops (Giant)",133),("Unknown item 1113",0),("Dry Sherry, 1lt",540)]
+*Main> look codeIndex 1111
+("Hula Hoops",21)
+*Main> look codeIndex 1112
+("Hula Hoops (Giant)",133)
+*Main> look codeIndex 1233
+("Unknown item 1233",0)
+*Main> lookup' 3842
+("Unknown item 3842",0)
+*Main> lookup' 1111
+("Hula Hoops",21)
+*Main> makeBill [1234,4719,3814,1112,1113,1234]
+[("Dry Sherry, 1lt",540),("Fish Fingers",121),("Orange Jelly",56),("Hula Hoo
+ps (Giant)",133),("Unknown item 1113",0),("Dry Sherry, 1lt",540)]
+*Main> :q
+Leaving GHCi.
+
+[jetrotte@turing ~]$ exit
+
+Script done on Wed 01 Oct 2014 11:32:56 PM CDT
