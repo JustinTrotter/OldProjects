@@ -1,0 +1,1 @@
+frequency.d: ../frequency.c
