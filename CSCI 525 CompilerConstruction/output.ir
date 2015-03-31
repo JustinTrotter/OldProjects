@@ -1,0 +1,21 @@
+push %rbp
+mov %rsp --> %rbp
+mov $0 --> -4(%rbp)
+mov $0 --> -8(%rbp)
+mov $2 --> -12(%rbp)
+mov $3 --> -16(%rbp)
+mov $0 --> -20(%rbp)
+.L2:
+mov -4(%rbp) --> %r1
+mov -8(%rbp) --> %r2
+cmp %r1 --> %r2
+je .L3
+mov -4(%rbp) --> %r3
+mov $1 --> %r4
+add %r3 --> %r4
+mov %r4 --> -4(%rbp)
+jmp .L2
+.L3:
+mov $9 --> -8(%rbp)
+pop %rbp
+ret

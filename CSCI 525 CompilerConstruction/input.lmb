@@ -1,0 +1,15 @@
+main
+{
+	int a = 0;
+	int b;
+	b = 0;
+	int c = 2;
+	int d = 3;
+	int e = 0;
+
+	while(a != b)
+	{
+		a = a + 1;
+	}
+	b = 9;
+}
